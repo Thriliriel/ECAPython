@@ -1,0 +1,16 @@
+<html>
+<head>
+    <title>oi!</title>
+</head>
+<body>
+    <h3>PAD</h3>
+    <div>{{ padValue.boredom }}</div>
+
+    <video width="500px" controls autoplay="autoplay">
+        <source src="/static/Happy1.mkv" type="video/mp4">
+    </video>
+
+    <h3 class="mt-5">Live Streaming</h3>
+    <img src="{{ url_for('video_feed') }}" width="500px">
+</body>
+</html>
