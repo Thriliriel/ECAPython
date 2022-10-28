@@ -1,10 +1,25 @@
 <html>
 <head>
     <title>oi!</title>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type=text/javascript>
+        $(function() {
+          $('a#test').bind('click', function() {
+            $.getJSON('/update',
+                function(data) {
+              //do nothing
+            });
+        return false;
+      });
+    });
+    </script>
 </head>
 <body>
     <h3>PAD</h3>
     <div>{{ padValue.boredom }}</div>
+
+    <a href=# id=test><button class='btn btn-default'>Hit me senpai!</button></a>
 
     <video width="500px" controls autoplay="autoplay">
         <source src="/static/Happy1.mkv" type="video/mp4">

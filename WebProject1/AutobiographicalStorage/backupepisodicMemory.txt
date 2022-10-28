@@ -1,0 +1,55 @@
+1;7/10/2019 10:00:00;Arthur;Person;1;1
+2;7/10/2019 10:00:00;AutobiographicalStorage/Images/Arthur.png;Imagery;1;1
+3;7/10/2019 10:00:00;Brazil;Location;1;1
+4;7/10/2019 10:00:00;2019;Time;1;1
+5;7/10/2019 10:00:00;born;Activity;1;1
+6;7/10/2019 10:00:00;work;Activity;1;1
+7;7/10/2019 10:00:00;study;Activity;1;1
+8;7/10/2019 10:00:00;has children;Activity;1;1
+9;7/10/2019 10:00:00;Joy;Emotion;1;1
+10;7/10/2019 10:00:00;Sadness;Emotion;1;1
+11;7/10/2019 10:00:00;meet;Activity;1;1
+12;7/10/2019 10:00:00;learn;Activity;1;1
+13;7/10/2019 10:00:00;like;Activity;1;1
+14;7/10/2019 10:00:00;love;Activity;1;1
+15;7/10/2019 10:00:00;food;Object;1;1
+16;7/10/2019 10:00:00;pizza;Object;1;1
+17;7/10/2019 10:00:00;calabresa;Object;1;1
+18;7/10/2019 10:00:00;portuguesa;Object;1;1
+19;7/10/2019 10:00:00;music;Object;1;1
+20;7/10/2019 10:00:00;Sonata Artica;Person;1;1
+21;7/10/2019 10:00:00;favorite;Object;1;1
+22;7/10/2019 10:00:00;band;Object;1;1
+23;7/10/2019 10:00:00;White Pearl Black Oceans;Object;1;1
+24;7/10/2019 10:00:00;play;Activity;1;1
+25;7/10/2019 10:00:00;video games;Object;1;1
+26;7/10/2019 10:00:00;game;Object;1;1
+27;7/10/2019 10:00:00;Zelda;Object;1;1
+28;7/10/2019 10:00:00;song;Object;1;1
+29;7/10/2019 10:00:00;pet;Object;1;1
+30;7/10/2019 10:00:00;die;Activity;1;1
+31;7/10/2019 10:00:00;Gotchi;Person;1;1
+32;7/10/2019 10:00:00;dog;Object;1;1
+33;7/10/2019 10:00:00;have;Activity;1;1
+34;7/10/2019 10:00:00;accident;Object;1;1
+35;7/10/2019 10:00:00;some time ago;Time;1;1
+36;7/10/2019 10:00:00;videogames;Object;1;1
+37;7/10/2019 10:00:00;videogame;Object;1;1
+%%%
+1;7/10/2019 10:00:00;agent;I was born at Brazil in 2019-08-10;1;1_2_3_4_5
+2;7/10/2019 10:00:00;agent;I have no job;-1;1_6_10
+3;7/10/2019 10:00:00;agent;I am not studying;-1;1_7_10
+4;7/10/2019 10:00:00;agent;I have no children;-1;1_8_9
+5;7/10/2019 10:00:00;agent;That is me!;1;1_2_9
+6;7/10/2019 10:00:00;agent;I like food;1;1_13_15_9
+7;7/10/2019 10:00:00;agent;I love pizza;1;1_14_16_9
+8;7/10/2019 10:00:00;agent;My favorite pizza is calabresa;1;1_13_14_17_21_16_9
+9;7/10/2019 10:00:00;agent;I do not like portuguesa;-1;1_13_18_10
+10;7/10/2019 10:00:00;agent;I love music;1;1_14_19_9
+11;7/10/2019 10:00:00;agent;My favorite band is Sonata Arctica;1;1_21_22_13_14_20_9
+12;7/10/2019 10:00:00;agent;My favorite music is White Pearl Black Oceans;1;1_21_19_13_14_23_28_9
+13;7/10/2019 10:00:00;agent;I love to play video games;1;1_13_14_24_25_26_9_36_37
+14;7/10/2019 10:00:00;agent;My favorite game is Zelda;1;1_13_14_21_26_27_9
+15;7/10/2019 10:00:00 AM;agent;My favorite food is pizza;1;1_13_14_15_21_16_9
+16;7/10/2019 10:00:00 AM;agent;I had a dog pet named Gotchi;-1;1_33_32_31_29_10
+17;7/10/2019 10:00:00 AM;agent;Gotchi died in an accident some time ago;-1;1_31_30_34_35_29_10
