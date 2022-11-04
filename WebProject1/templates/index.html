@@ -19,13 +19,16 @@
     <h3>PAD</h3>
     <div>{{ padValue.boredom }}</div>
 
+    <input type="text" width="300px" placeholder="Talk with me..." />
+
+    <textarea style="width: 400px; height: 400px;" disabled>Chat</textarea>
+
     <a href=# id=test><button class='btn btn-default'>Hit me senpai!</button></a>
 
-    <video width="500px" controls autoplay="autoplay">
-        <source src="/static/Happy1.mkv" type="video/mp4">
+    <video width="300px" controls autoplay="autoplay" style="float: left">
+        <source src="/static/Happy1.mp4" type="video/mp4">
     </video>
 
-    <h3 class="mt-5">Live Streaming</h3>
-    <img src="{{ url_for('video_feed') }}" width="500px">
+    <img src="{{ url_for('video_feed') }}" width="300px" style="float: right; margin-right: 100px;">
 </body>
 </html>

@@ -30,15 +30,21 @@
     <Compile Include="app.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Dialog.py" />
+    <Compile Include="DialogNode.py" />
     <Compile Include="ESK.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GeneralEvents.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Main.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PAD.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Topic.py" />
     <Compile Include="Vector3.py">
       <SubType>Code</SubType>
     </Compile>

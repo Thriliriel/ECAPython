@@ -30,7 +30,7 @@ class Dialog(object):
 		tokensList = newtokensList
 
 		for childId in self.currentNode.GetChildren().keys():
-			if childrenCount.has_key(childId):
+			if childId in childrenCount:
 				print("Child ID ("+ childId +") already inserted!")
 
 			childrenCount[childId] = 0
@@ -96,7 +96,7 @@ class Dialog(object):
 
 	#used to build de dialog
 	def AddNode(self, id, content, fatherId):
-		if self.nodes.has_key(id):
+		if id in self.nodes:
 			print("ID already inserted " + id + " must be unique!")
 			return
 
@@ -119,17 +119,17 @@ class Dialog(object):
 
 	def AddKeywords(self, id, keywordsList, fatherId):
 		if fatherId != "-1":
-			if not self.nodes.has_key(fatherId):
+			if fatherId not in self.nodes:
 				print("node ID not found: " + fatherId)
 				return
-			if not self.nodes.has_key(id):
+			if id not in self.nodes:
 				print("node ID not found: " + id)
 				return
 
 			fatherRef = self.nodes[fatherId]
 
 			for kw in keywordsList:
-				fatherRef.AddKeyword(id, kw, keywordsList[kw])
+				fatherRef.AddKeyword(id, kw[0], kw[1])
 
 	def Done(self):
 		self.currentNode.ResetChildren()

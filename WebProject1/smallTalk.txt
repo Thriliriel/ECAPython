@@ -24,11 +24,11 @@ $ emotions
 # EMOfe0804; That is too bad.; EMOfe0503;
 ]
 [ anger_emotion
-#EMOae0101; I am feeling a bit angry today. How about you?; -1
-#EMOae0202; Because I was playing a game with my friend Bella and I lost.; EMOae0101;
-#EMOae0302; It is good to hear that; EMOae0101;
-#EMOae0402; I am sorry to hear that. Do you wanna talk about it?; EMOae0202;
-#EMOae0503; I can be a little competitive. I will work on that!; EMOae0202;
+# EMOae0101; I am feeling a bit angry today. How about you?; -1
+# EMOae0202; Because I was playing a game with my friend Bella and I lost.; EMOae0101;
+# EMOae0302; It is good to hear that; EMOae0101;
+# EMOae0402; I am sorry to hear that. Do you wanna talk about it?; EMOae0202;
+# EMOae0503; I can be a little competitive. I will work on that!; EMOae0202;
 ]
 
 $ food

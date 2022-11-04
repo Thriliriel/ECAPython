@@ -14,7 +14,7 @@ class DialogNode(object):
 		self.children = {}
 
 	def AddChild(self, childId):
-		if not self.children.has_key(childId):
+		if childId not in self.children:
 			self.children[childId] = {}
 		else:
 			print("Child ID ("+ childId +") already used at this node! (internal error)")
@@ -27,7 +27,7 @@ class DialogNode(object):
 		except:
 			print("Child ID ("+ childId +") not found! (internal error)")
 
-		if value.has_key(keyword):
+		if keyword in value:
 			print("Keyword " + keyword + " already used in " + childId + ". Keyword must be unique for each ID!")
 		else:
 			self.children[childId][keyword] = weight
