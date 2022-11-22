@@ -1,6 +1,6 @@
 from datetime import datetime
 
-class GeneralEvents(object):
+class GeneralEvent(object):
 	#event information
 	#unique ID
 	informationID = 0

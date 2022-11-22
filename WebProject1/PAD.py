@@ -73,7 +73,7 @@ class PAD(object):
 			oldArousal = self.arousal
 
 			self.pleasure = (self.pleasure + polarity) / 2.0
-			self.arousal = math.abs(polarity) + self.boredom
+			self.arousal = abs(polarity) + self.boredom
 			if self.arousal > 1: 
 				self.arousal = 1
 			if self.arousal < -1: 
@@ -112,3 +112,15 @@ class PAD(object):
 			pe = self.padEmotions[emotion]
 			self.pleasure = pe.x
 			self.arousal = pe.y
+
+	def GetPleasure(self):
+		return self.pleasure
+
+	def GetArousal(self):
+		return self.arousal
+
+	def GetDominance(self):
+		return self.dominance
+
+	def GetBoredom(self):
+		return self.boredom

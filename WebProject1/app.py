@@ -1,11 +1,16 @@
 #from http.client import responses
 from time import sleep
-from flask import Flask
+from flask import Flask, request
 from flask import render_template, Response #request, escape,
 from flask import send_from_directory
 import os
 import cv2
 from Main import Main
+import sys
+import random
+from turbo_flask import Turbo
+import threading
+import time
 #import numpy as np
 #import asyncio
 
@@ -13,6 +18,9 @@ from Main import Main
 # The first argument is the name of the application module or package,
 # typically __name__ when using a single module.
 app = Flask(__name__)
+
+# turboFlask tutorial: https://blog.miguelgrinberg.com/post/dynamically-update-your-flask-web-pages-using-turbo-flask
+turbo = Turbo(app)
 
 camera = cv2.VideoCapture(0)
 
@@ -30,20 +38,11 @@ def favicon():
 
 @app.route('/')
 def hello():
-	#example getting GET parameter
-	#celsius = str(escape(request.args.get("celsius", "")))
+	awake()
 
-	#just testing
-	#pad = PAD(0.8, 0.5, 0.5)
-	#i = 0
-	#while i < 100:
-	#	pad.IncreaseBoredom(0.5, 0.8, 0.5)
-	#	print(str(pad.boredom))
-	#	i += 1
+	update()
 
-	gen_pad()
-
-	return render_template('index.html', padValue = mainControl.pad)
+	return render_template('index.html', padValue = mainControl.pad, chatLog = mainControl.chatLog)
 
     # Render the page
     #return "Hello Python!"
@@ -56,29 +55,31 @@ def hello():
  #       + fahrenheit + "\n"
  #   )
 
+def awake():
+	mainControl.Awake()
+
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/update')
 def update():
-	mainControl.loadKeywords()
-	mainControl.loadSTs()
-
-	#response = "Batata!!!"
-	#return response, 200, {'Content-Type': 'text/plain'}
-
 	while True:
 		response = "Batata!!!"
 		print(response)
 		sleep(1/mainControl.fps)
+		yield response
 		#return response, 200, {'Content-Type': 'text/plain'}
 
-def gen_pad():
-	while True:
-		mainControl.pad.IncreaseBoredom(0.5, 0.8, 0.5)
-		print(mainControl.pad.boredom)
-		yield(mainControl.pad.boredom)
+@app.route('/chat', methods=('GET', 'POST'))
+def chat():
+	chatText = ""
+	if request.method == 'GET':
+		chatText = request.args.get('chatText')
+	print(chatText)
+	mainControl.SendRequestChat(chatText)
+	update_load()
+	return chatText
 
 def gen_frames():  
     while True:
@@ -90,6 +91,23 @@ def gen_frames():
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+
+@app.context_processor
+def inject_load():
+	return {'chatLog': mainControl.chatLog}
+
+def update_load():
+	with app.app_context():
+		turbo.push(turbo.replace(render_template('chat.html'), 'load'))
+#def update_load():
+#    with app.app_context():
+#        while True:
+#            time.sleep(2)
+#            turbo.push(turbo.replace(render_template('chat.html'), 'load'))
+
+#@app.before_first_request
+#def before_first_request():
+#    threading.Thread(target=update_load).start()
 
 #async def update():
 #	while True:

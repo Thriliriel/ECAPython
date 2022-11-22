@@ -4,24 +4,51 @@
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script type=text/javascript>
-        $(function() {
-          $('a#test').bind('click', function() {
-            $.getJSON('/update',
-                function(data) {
-              //do nothing
+        function htmlEncode(str) {
+            return String(str).replace(/[^\w. ]/gi, function (c) {
+                return '&#' + c.charCodeAt(0) + ';';
             });
-        return false;
-      });
-    });
+        }
+
+        $(function () {
+            $('a#test').bind('click', function () {
+                $.getJSON('/update',
+                    function (data) {
+                        //do nothing
+                    });
+                return false;
+            });
+
+            $('form#chat').bind('submit', function () {
+                //window.alert($('input#chatText').val());
+                var valor = htmlEncode($('input#chatText').val());
+                $('input#chatText').val("");
+
+                /*#put it in the general chat as well
+                string newText = "<b>" + personName + "</b>: " + textSend + "\n";
+                chatText.text += newText;*/
+
+                if (valor != "") {
+                    $.getJSON('/chat?chatText=' + valor,
+                        function (data) {
+                            //do nothing
+                        });
+                    return false;
+                } else {
+                    return false
+                }
+            });
+        });
     </script>
+
+    {{ turbo() }}
 </head>
 <body>
-    <h3>PAD</h3>
-    <div>{{ padValue.boredom }}</div>
+    <form id="chat" method="get">
+        <input id="chatText" name="chatText" type="text" width="300px" placeholder="Talk with me..." value="{{ request.form['chatText'] }}" />
+    </form>
 
-    <input type="text" width="300px" placeholder="Talk with me..." />
-
-    <textarea style="width: 400px; height: 400px;" disabled>Chat</textarea>
+    {% include "chat.html" %}
 
     <a href=# id=test><button class='btn btn-default'>Hit me senpai!</button></a>
 

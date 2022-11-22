@@ -133,3 +133,14 @@ class Dialog(object):
 
 	def Done(self):
 		self.currentNode.ResetChildren()
+
+	#check how many cues are inside the nodes of this dialog
+	def CheckCuesNodes (self, cues):
+		qntFound = 0
+
+		for nd in self.nodes:
+			for cue in cues:
+				if cues[cue] in self.nodes[nd].GetSentence():
+					qntFound += 1
+
+		return qntFound

@@ -1,5 +1,4 @@
-from curses import has_key
-
+#from curses import has_key
 
 class DialogNode(object):
 	id = ""

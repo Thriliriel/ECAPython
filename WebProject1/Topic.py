@@ -26,7 +26,7 @@ class Topic(object):
 
 		#check if already used
 		#UnityEngine.Debug.Log(_identificator + "-" + currentDialog.GetDescription() + "-" + currentDialog.GetId().ToString());
-		while self.id + "-" + self.currentDialog.GetDescription() + "-" + self.currentDialog.GetId().ToString() in memoryDialogs:
+		while self.id + "-" + self.currentDialog.GetDescription() + "-" + self.currentDialog.GetId() in memoryDialogs:
 			#get next
 			#currentDialog.NextSentence(p, sentence);
 			self.currentDialog.NextSentence(tokenizeSentence)
@@ -46,7 +46,8 @@ class Topic(object):
 
 	#internal function to finish a dialog
 	def CloseDialog(self):
-		self.dialogs.remove(self.currentDialog)
+		if self.currentDialog in self.dialogs:
+			self.dialogs.remove(self.currentDialog)
 		#self.ChangeState()
 		self.busy = False
 
@@ -59,7 +60,7 @@ class Topic(object):
 		#if we have emotion, we need to find the correct dialog. Otherwise, it can be random.
 		index = -1
 		if emotion == "":
-			rnd = random.randint(0, len(self.dialogs))
+			rnd = random.randint(0, len(self.dialogs)-1)
 			index = rnd
 			#var rnd = new System.Random(DateTime.Now.Millisecond);
 			#index = rnd.Next(0, dialogs.Count);
@@ -74,11 +75,12 @@ class Topic(object):
 
 			#if did not find, get random, whatever!
 			if index == -1:
-				rnd = random.randint(0, len(self.dialogs))
+				rnd = random.randint(0, len(self.dialogs)-1)
 				index = rnd
 				#var rnd = new System.Random(DateTime.Now.Millisecond);
 				#index = rnd.Next(0, dialogs.Count);
 
+		#print(index)
 		d = self.dialogs[index]
 		self.dialogs.remove(d)
 		return d
