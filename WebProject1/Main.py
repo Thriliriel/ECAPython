@@ -6,6 +6,7 @@ from datetime import datetime
 from GeneralEvents import GeneralEvent
 from ESK import ESK
 from Vector3 import Vector3
+from IceBreakTree import IceBreakTree
 import requests
 
 class Main(object):
@@ -20,6 +21,14 @@ class Main(object):
 	topicsFinal = []
 	#current topic
 	currentTopic = None
+	#ice breakers
+	iceBreakers = None
+	#is breaking ice?
+	isBreakingIce = False
+	#id of the icebreaker in use
+	usingIceBreaker = 0
+	#id of the actual root icebreaker, if it is going down the tree
+	rootIceBreaker = 0
 	#list with all dialogs/topics in memory
 	dialogsInMemory = []
 	dialogsAnswersInMemory = []
@@ -96,16 +105,16 @@ class Main(object):
 		#if Arthur is in chat mode, we can deactivate all graphical stuff
 		if self.chatMode:
 			self.canSpeak = False
-
-		#WITHOUT ICEBREAKERS
+			
 		#set the ice breakers
-		#rootIceBreaker = usingIceBreaker = -1;
-		##first element is just the pointer to the root questions
-		#iceBreakers = new IceBreakingTreeClass(0, "root", "", false);
-		#usingIceBreaker = 0;
+		self.rootIceBreaker = -1
+		self.usingIceBreaker = -1
+		#first element is just the pointer to the root questions
+		self.iceBreakers = IceBreakTree(0, "root", "", False)
+		self.usingIceBreaker = 0
 
-		##load icebreakers and answers from the file
-		#LoadIceBreakersAndStuff();
+		#load icebreakers and answers from the file
+		self.LoadIceBreakersAndStuff()
 
 		#set the small talks
 		self.LoadKeywords()
@@ -151,41 +160,7 @@ class Main(object):
 		##if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_XBOXONE
 		##load prolog beliefs
 		#LoadBeliefs();
-		##endif
-
-		#MAYBE IN FUTURE
-		##also, see if this person already exists in memory, in the case of chat mode. If it does not, we need to add.
-		#if (chatMode)
-		#{
-		#	bool yup = false;
-		#	foreach(KeyValuePair<int, MemoryClass> ltm in agentLongTermMemory)
-		#	{
-		#		if(ltm.Value.information == personName)
-		#		{
-		#			yup = true;
-		#			break;
-		#		}
-		#	}
-
-		#	if (!yup)
-		#	{
-		#		int thisID = AddToSTM("Person", personName, 0.9f);
-		#		personId = thisID;
-		#		List<int> connectNodes = new List<int>();
-		#		connectNodes.Add(1);
-		#		connectNodes.Add(thisID);
-		#		#since it is chat mode, no image
-		#		#thisID = AddToSTM("Imagery", "AutobiographicalStorage/Images/" + namePerson + ".png", 0.9f);
-		#		#connectNodes.Add(thisID);
-		#		connectNodes.Add(11);
-
-		#		#add this date as well
-		#		string thisYear = System.DateTime.Now.ToString("yyyy-MM-dd");
-		#		thisID = AddToSTM("Time", thisYear, 0.9f);
-		#		connectNodes.Add(thisID);
-		#		AddGeneralEvent("I met " + personName + " today", connectNodes, "person");
-		#	}
-		#}
+		##endif		
 
 		#start stuff
 		self.LoadPersonality()
@@ -201,15 +176,14 @@ class Main(object):
 		#memory decay and removal after 15 seconds. TODO
 		#StartCoroutine(ControlSTM());
 
-		#face recognition co-routine
-		#MAYBE ONE DAY WITH CAM
-		#StartCoroutine(ChangeFaceName());
-
 		#start the idle timer with the seconds now
 		self.idleTimer = datetime.now()
 
 		#first smalltalk
-		self.SmallTalking([])
+		#self.SmallTalking([])
+
+		#meet
+		self.MeetNewPeople()
 
 	def LoadKeywords(self):
 		fl = open("keywords.txt")
@@ -511,6 +485,31 @@ class Main(object):
 		chosenEmo = self.FindPADEmotion()
 		
 		self.SetEmotion(chosenEmo.lower())
+
+	#load the icebreakers and respective answers
+	def LoadIceBreakersAndStuff(self):
+		fl = open("icebreakers.txt")
+		iceBreak = fl.read().split('\n')
+		fl.close()
+		
+		for line in iceBreak:
+			#if it has #, it is comments
+			if line == "" or "#" in line:
+				continue
+
+			info = line.split(';')
+			ibId = int(info[0])
+			ibType = info[1]
+			ibQuestion = info[2]
+			ibPolarity = bool(info[3])
+			ibParent = int(info[4])
+
+			#if parent is 0, is one of the primary ones
+			if ibParent == 0:
+				self.iceBreakers.AddChild(IceBreakTree(ibId, ibType, ibQuestion, ibPolarity))
+			#otherwise, it is one of the secondary ones. Need to first find the parent and, then, add
+			else:
+				self.iceBreakers.FindIcebreaker(ibParent).AddChild(IceBreakTree(ibId, ibType, ibQuestion, ibPolarity))
 
 	#find the closest emotion from PAD
 	def FindPADEmotion(self):
@@ -1135,3 +1134,119 @@ class Main(object):
 	#dunno
 	def Dunno(self):
 		self.SpeakYouFool("Sorry, i do not know.")
+
+	#meet someone new
+	def MeetNewPeople(self):
+		greetingText = "Hello stranger! May i know your name?"
+		self.SpeakYouFool(greetingText)
+
+		#need to wait for the answer
+		self.isGettingInformation = False
+		self.isKnowingNewPeople = True
+
+	#at the first time the agent founds a face, checks if it already knows it. If so, greet it
+	def GreetingTraveler(self, mate):
+		greetingText = "Greetings " + mate + "!"
+
+		#back to chatbot
+		self.isGettingInformation = False
+		self.isKnowingNewPeople = False
+
+		#since they know each other, lets start to break the ice!
+		self.isBreakingIce = True
+		self.BreakIce(greetingText)
+
+	#breaking the ice!
+	def BreakIce(self, beforeText = ""):
+		self.saveNewMemoryNode = False
+
+		#reset the idle timer
+		self.idleTimer = datetime.now()
+
+		actualIceBreaker = self.iceBreakers.FindIcebreaker(self.usingIceBreaker)
+        
+		#just follow the tree
+		#if still not using any, get the first
+		if self.usingIceBreaker == 0:
+			self.usingIceBreaker = self.iceBreakers.GetChild(0).GetId()
+			self.rootIceBreaker = self.iceBreakers.GetId()
+		else:
+			#othewise, we check if this icebreaker has children. 
+			#If it has, it means it has an alternative route depending on the answer of the person
+			if actualIceBreaker.QntChildren() > 0:
+				#now we check which question is it
+				#if it is one of the first levels, we check the polarity of the answer: if it is opposite of what was expected, we take the route
+				if actualIceBreaker.GetParent().GetId() == 0:
+					if (actualIceBreaker.GetPolarity() == True and self.lastPolarity < 0) or (actualIceBreaker.GetPolarity() == False and self.lastPolarity > 0):
+						#down the hill
+						self.usingIceBreaker = actualIceBreaker.GetChild(0).GetId()
+					else:
+						#otherwise, we just get next
+						thisChild = actualIceBreaker.CheckWhichChild()
+
+						#next one
+						thisChild += 1
+
+						#see if the parent has more children
+						if self.iceBreakers.FindIcebreaker(self.rootIceBreaker).QntChildren() > thisChild:
+							self.usingIceBreaker = self.iceBreakers.FindIcebreaker(self.rootIceBreaker).GetChild(thisChild).GetId()
+						#otherwise, we are done
+						else:
+							self.usingIceBreaker = -1
+							self.rootIceBreaker = -1
+				#otherwise, just keep going
+				else:
+					self.usingIceBreaker = actualIceBreaker.GetChild(0).GetId()
+			#Otherwise, we can just go on to the next
+			else:
+				thisChild = actualIceBreaker.CheckWhichChild()
+
+				#next one
+				thisChild += 1
+
+				#see if the parent has more children
+				if self.iceBreakers.FindIcebreaker(self.rootIceBreaker).QntChildren() > thisChild:
+					self.usingIceBreaker = self.iceBreakers.FindIcebreaker(self.rootIceBreaker).GetChild(thisChild).GetId()
+				#otherwise, we are done
+				else:
+					self.usingIceBreaker = -1
+					self.rootIceBreaker = -1
+        
+		#if found some icebreaker to still use, icebreak should not be empty
+		if self.usingIceBreaker > 0:
+			#before we speak, we should check the memory to see if this questions was already answered before.
+			target = self.iceBreakers.FindIcebreaker(self.usingIceBreaker)
+
+			targetType = target.GetType()
+			if targetType == "old":
+				targetType = "born"
+			if targetType == "working":
+				targetType = "job"
+			if targetType == "study":
+				targetType = "studying"
+
+			#so, lets try to find some general event
+			fuck = None
+
+			for geez in self.agentGeneralEvents:
+				#if it exists, ding!
+				if self.personName in self.agentGeneralEvents[geez].information and targetType in self.agentGeneralEvents[geez].information:
+					fuck = self.agentGeneralEvents[geez]
+					break
+
+			#if found it, we change the question to reflect the previous knowledge
+			#update: here, we do not make questions again. We just dont call icebreakers
+			if fuck != None:
+				self.BreakIce(beforeText)
+				return
+			#otherwise, just make the question
+			else:
+				self.SpeakYouFool(beforeText + target.GetQuestion())
+		#else, there is no more to talk about. Stop it
+		else:
+			if beforeText != "":
+				self.SpeakYouFool(beforeText)
+			else:
+				self.SpeakYouFool("Thanks! Anything else you would like to talk about?")
+
+			self.isBreakingIce = False

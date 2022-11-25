@@ -38,6 +38,9 @@
     <Compile Include="GeneralEvents.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="IceBreakTree.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Main.py">
       <SubType>Code</SubType>
     </Compile>

@@ -1,0 +1,22 @@
+########################################
+#This file maintains all the icebreakers Arthur can use during the interaction
+#
+#File structure:
+#Each line is an icebreaker
+#
+#Example:
+#ID;Type;Question;Polarity(True=Positive,False=Negative);ParentID
+#1;feeling;How are you feeling today?;true;0
+#3;fever;Do you have fever?;false;1
+#
+#The ParentID informs to which other icebreaker the icebreaker in question is related with. In the example above, the icebreaker 3 has parent as 1, thus, it is child of the icebreaker 1. Therefore, icebreaker 3 is only been used depending the answer given for icebreaker 1. 
+########################################
+
+1;old;How old are you?;true;0
+2;study;Do you study?;false;0
+3;work;Do you work?;false;0
+4;children;Do you have children?;false;0
+5;study course;Nice! What do you study?;true;2
+6;work job;I see. What is your job?;true;3
+7;children quantity;Good! How many kids do you have?;true;4
+8;children names;What are their names?;true;7
