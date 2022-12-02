@@ -8,11 +8,11 @@ class IceBreakTree(object):
 	#A positive polarity means that positive answers are expected ("i am good", "yes", and so on...)
 	polarity = True
 
-	def __init__(self, id, ibtype, question, parent):
+	def __init__(self, id, ibtype, question, polarity):
 		self.id = id
 		self.ibtype = ibtype
 		self.question = question
-		self.parent = parent
+		self.polarity = polarity
 		self.child = []
 
 	def GetId(self):

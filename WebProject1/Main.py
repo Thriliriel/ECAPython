@@ -8,6 +8,10 @@ from ESK import ESK
 from Vector3 import Vector3
 from IceBreakTree import IceBreakTree
 import requests
+from os.path import exists
+import os
+import shutil
+import base64
 
 class Main(object):
 	#attributes
@@ -53,7 +57,7 @@ class Main(object):
 	#last sentence polarity found
 	lastPolarity = 0
 	#list with the 5 last polarities
-	#lastPolarities = []
+	lastPolarities = []
 	#is it chat only mode?
 	chatMode = False
 	#key for online chatbot
@@ -94,6 +98,7 @@ class Main(object):
 	webServicePath = "http://localhost:5000/"
 
 	def Awake(self):
+		self.lastPolarities = []
 
 		#random agent
 		rnd = random.randrange(10)
@@ -155,8 +160,8 @@ class Main(object):
 		fl = open("nextId.txt")
 		idezinhos = fl.read().split('\n')
 		fl.close()
-		self.nextEpisodeId = idezinhos[1]
-		self.nextEskId = idezinhos[0]
+		self.nextEpisodeId = int(idezinhos[1])
+		self.nextEskId = int(idezinhos[0])
 		##if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_XBOXONE
 		##load prolog beliefs
 		#LoadBeliefs();
@@ -501,7 +506,10 @@ class Main(object):
 			ibId = int(info[0])
 			ibType = info[1]
 			ibQuestion = info[2]
-			ibPolarity = bool(info[3])
+			if info[3] == "true":
+				ibPolarity = True
+			else:
+				ibPolarity = False
 			ibParent = int(info[4])
 
 			#if parent is 0, is one of the primary ones
@@ -651,6 +659,18 @@ class Main(object):
 		print(tokensKey)
 		print(tknType)
 
+		#last tokensKey is polarity
+		pol = tokensKey[len(tokensKey)-1].split(':')
+		if len(pol) == 1:
+			pol = pol[0]
+		else:
+			pol = pol[1]
+		self.lastPolarity = float(pol)
+		#add to the list
+		if len(self.lastPolarities) == 5:
+			self.lastPolarities.pop(0)
+		self.lastPolarities.append(self.lastPolarity)
+
 		#assemble!
 		tokens = {}
 		for i in range(len(tokensKey)):
@@ -719,12 +739,10 @@ class Main(object):
 			if isQuestion and self.agentName in tokens and ("feel" in tokens or "feels" in tokens):
 				self.PickTopic("emotions")
 				emoTalk = True
-			#else if (!isGettingInformation && isKnowingNewPeople)
-			#{
-			#	SaveNewPerson(tokens);
-			#	isUsingMemory = false;
-			#}
-			elif not self.currentTopic.IsDialoging():
+			elif not self.isGettingInformation and self.isKnowingNewPeople:
+				self.SaveNewPerson(tokens)
+				self.isUsingMemory = False
+			elif not self.currentTopic.IsDialoging() and not self.isBreakingIce:
 				#if it is a question, we do not save it. Otherwise, yeap
 				self.saveNewMemoryNode = True
 				if isQuestion: 
@@ -736,16 +754,264 @@ class Main(object):
 			if self.isUsingMemory:
 				informationEvent = ""
 				
-				#save it
-				#if self.saveNewMemoryNode:
-					#SaveMemoryNode(tokens, informationEvent)
+				#if it is breaking ice, add the topic of the conversation and the person
+				if self.isBreakingIce:
+					if self.iceBreakers.FindIcebreaker(self.usingIceBreaker).GetType() in tokens:
+						tokens.pop(self.iceBreakers.FindIcebreaker(self.usingIceBreaker).GetType())
 
-				if self.currentTopic.IsDialoging():
+					tokens[self.iceBreakers.FindIcebreaker(self.usingIceBreaker).GetType()] = "NN"
+
+					if self.personName not in tokens:
+						tokens[self.personName] = "NNP"
+
+					informationEvent = self.iceBreakers.FindIcebreaker(self.usingIceBreaker).GetType() + " " + self.personName
+
+				#save it
+				if self.saveNewMemoryNode:
+					self.SaveMemoryNode(tokens, informationEvent)
+
+				#here, if it is breaking the ice, try to keep the conversation alive
+				if self.isBreakingIce:
+					self.BreakIce()
+				#else, if it is just small talking, get the answer
+				elif self.currentTopic.IsDialoging():
 					asToki = []
 					for key in tokens:
 						asToki.append(key)
 					self.SmallTalking(asToki)
-		
+
+			#reset
+			self.isUsingMemory = True
+
+	#save ice breakers on memory
+	def SaveIceBreaker(self, tokens, informationEvent):
+		weight = 0.9
+		#depending on the ice breaker, we just add info in the person
+		if "old" in tokens:
+			birth = ""
+			thisID = -1
+			for txt in tokens:
+				if txt != self.personName and txt != "old":
+					#since we are saving the Time aspect, just do some math to create a proper date
+					thisYear = int(datetime.now().year)
+					try:
+						result = thisYear - int(txt)
+						birth = str(result)
+						thisID = self.AddToSTM("Time", birth, weight)
+					except:
+						continue
+
+			#save the episode with person, "born" and year
+			connectNodes = []
+			connectNodes.append(self.personId)
+			connectNodes.append(5)
+			connectNodes.append(9)
+			connectNodes.append(thisID)
+			self.AddGeneralEvent(self.personName + " was born in " + birth + "-01-01", connectNodes, "person")
+		elif "study" in tokens and "study course" not in tokens:
+			#here, we just need to get last polarity, because it is just study or not
+			#if it is negative, we can already save it. Otherwise, we just save when details are provided
+			if self.lastPolarity < 0:
+				connectNodes = []
+				connectNodes.append(self.personId)
+				connectNodes.append(7)
+				connectNodes.append(9)
+				self.AddGeneralEvent(self.personName + " is not studying", connectNodes, "person")
+		elif "work" in tokens and "work job" not in tokens:
+			#here, we just need to get last polarity, because it is just study or not
+			#if it is negative, we can already save it. Otherwise, we just save when details are provided
+			if self.lastPolarity < 0:
+				connectNodes = []
+				connectNodes.append(self.personId)
+				connectNodes.append(6)
+				connectNodes.append(9)
+				self.AddGeneralEvent(self.personName + " is not working", connectNodes, "person")
+		elif "children" in tokens and "children quantity" not in tokens and "children names" not in tokens:
+			for txt in tokens:
+				if txt != self.personName and txt != "children":
+					#if answer is no, so no!
+					if self.lastPolarity < 0:
+						connectNodes = []
+						connectNodes.append(self.personId)
+						connectNodes.append(8)
+						connectNodes.append(9)
+						self.AddGeneralEvent(self.personName + " has no children", connectNodes, "person")
+		elif "study course" in tokens:
+			course = ""
+			for txt in tokens:
+				if txt != self.personName and txt != "study course" and (tokens[txt] == "NN"):
+					if course == "":
+						course = txt
+					else:
+						course += "_" + txt
+
+			thisID = self.AddToSTM("Activity", course, weight)
+
+			connectNodes = []
+			connectNodes.append(self.personId)
+			connectNodes.append(7)
+			connectNodes.append(9)
+			connectNodes.append(thisID)
+			self.AddGeneralEvent(self.personName + " is studying " + course, connectNodes, "person")
+		elif "work job" in tokens:
+			job = ""
+			for txt in tokens:
+				if txt != self.personName and txt != "work job":
+					if job == "":
+						job = txt
+					else:
+						job += "_" + txt
+
+			thisID = self.AddToSTM("Activity", job, weight)
+
+			connectNodes = []
+			connectNodes.append(self.personId)
+			connectNodes.append(6)
+			connectNodes.append(9)
+			connectNodes.append(thisID)
+			self.AddGeneralEvent(self.personName + " is working as " + job, connectNodes, "person")
+		elif "children names" in tokens:
+			qntChild = 0
+			connectNodes = []
+			connectNodes.append(self.personId)
+			connectNodes.append(8)
+			connectNodes.append(9)
+			who = ""
+			for txt in tokens:
+				if txt != self.personName and txt != "children names" and txt != "and":
+					thisID = self.AddToSTM("Person", txt, weight)
+					connectNodes.Add(thisID);
+
+					if who == "": 
+						who = txt
+					else:
+						who += " and " + txt
+
+					qntChild += 1
+
+			#if qntChild > 0, we save the children
+			if qntChild > 0:
+				self.AddGeneralEvent(self.personName + " has "+qntChild+" children: " + who, connectNodes, "person")
+
+	def SaveSmallTalk(self, tokens):
+		#if we have 2 or more NNP in sequence, we understand it is a compound name (ex: Sonata Artica)
+		newTokens = {}
+		merging = ""
+
+		for tt in tokens:
+			#if it is a NNP
+			if tokens[tt] == "NNP":
+				if merging == "":
+					merging += tt
+				else:
+					merging += "_" + tt
+			#otherwise, we can check if we have something to add
+			else:
+				if merging != "":
+					newTokens[merging] = "NNP"
+					newTokens[tt] = tokens[tt]
+				else:
+					newTokens[tt] = tokens[tt]
+
+				merging = ""
+
+		#if last word(s) are NNP, we still need to add it
+		if merging != "":
+			newTokens[merging] = "NNP"
+			merging = ""
+
+		#now, save the answer
+		weight = 0.8
+
+		connectNodes = []
+		infor = self.personName
+        
+		#for each information, save it in memory
+		for txt in newTokens:
+			#words like "be", "is" or such can be ignored
+			if txt == "be" or txt == "is" or txt == "yes" or txt == "no" or txt == "sure":
+				continue
+
+			fiveW = ""
+			#NEED TO SEE HOW TO TAKE THE NAMED ENTITIES
+			#if it is a proper noun, people
+			if newTokens[txt] == "NNP":
+				fiveW = "Person"
+			#else, if it is a noun or adjective, object
+			elif newTokens[txt] == "NN" or newTokens[txt] == "JJ":
+				fiveW = "Object"
+			#else, if it is a verb, activity
+			elif newTokens[txt] == "VB" or newTokens[txt] == "VBP" or newTokens[txt] == "VBN":
+				fiveW = "Activity"
+
+			#if fiveW is empty, no need to store
+			if fiveW != "":
+				#strip the "'"
+				thisID = self.AddToSTM(fiveW, txt.Key, weight)
+				connectNodes.append(thisID)
+
+				if txt not in infor:
+					infor += " " + txt
+
+		#create a new general event
+		if len(connectNodes) > 0:
+			#just add person if it is not already in
+			if self.personId not in connectNodes:
+				connectNodes.append(self.personId)
+
+			self.AddGeneralEvent(infor.strip(), connectNodes, "person")
+
+		connectNodes.clear()
+
+	#save a new memory node and return the tokens
+	def SaveMemoryNode(self, tokens, informationEvent):
+		#list to keep memory IDS inserted, so we can connect them later
+		connectNodes = []
+		#string typeEvent = "interaction";
+		weight = 0.5
+
+		if self.isBreakingIce:
+			self.SaveIceBreaker(tokens, informationEvent)
+		elif self.currentTopic.IsDialoging():
+			self.SaveSmallTalk(tokens)
+		else:
+			#for each information, save it in memory
+			potato = ""
+			for txt in tokens:
+				fiveW = ""
+				#NEED TO SEE HOW TO DO IT YET. FOR NOW:
+				#if it is a proper noun, people
+				if tokens[txt] == "NNP":
+					fiveW = "Person"
+				#else, if it is a noun, object
+				elif tokens[txt] == "NN":
+					fiveW = "Object"
+				#else, if it is a verb, activity
+				elif tokens[txt] == "VB" or tokens[txt] == "VBP":
+					fiveW = "Activity"
+
+				#if fiveW is empty, no need to store
+				if fiveW != "":
+					#there are still some thing we do not need to save (for example: be)
+					if txt == "be": 
+						continue
+
+					#strip the "'"
+					thisID = self.AddToSTM(fiveW, txt, weight)
+					connectNodes.append(thisID)
+					if potato == "": 
+						potato = txt
+					else:
+						potato += " " + txt
+
+			#create a new general event
+			if len(connectNodes) > 0:
+				if informationEvent == "":
+					informationEvent = potato
+
+				self.AddGeneralEvent(informationEvent.strip(), connectNodes, "belief")
+
+			connectNodes.clear()
 		
 	def FirstLetterToLower(self, text):
 		if text == None:
@@ -1019,7 +1285,7 @@ class Main(object):
 					self.agentLongTermMemory[self.agentShortTermMemory[less].informationID] = self.agentShortTermMemory[less]
 
 					#delete
-					self.agentShortTermMemory.remove(less)
+					self.agentShortTermMemory.pop(less)
 
 			#add the new memory at the beggining of the memory
 			#just generate new if ind == 0 
@@ -1046,6 +1312,52 @@ class Main(object):
 					self.agentShortTermMemory[ind] = newMemory
 
 		return ind
+
+	#add a new general event and return its id
+	def AddGeneralEvent(self, informationEvent, connectNodes, typeEvent, loadingWordnet = False):
+		#if the memory already contains this general event, or something similar, do not add
+		ind = 0
+
+		for ges in self.agentGeneralEvents:
+			if informationEvent == self.agentGeneralEvents[ges].information:
+				ind = ges
+				break
+
+		#if it is loading Wordnet, it can exist different terms with the same description.
+		if ind > 0 and not loadingWordnet:
+			#although we do not add a new general event, we can update the information
+			self.agentGeneralEvents[ind].nodes.clear()
+			self.agentGeneralEvents[ind].eventType = typeEvent
+			self.agentGeneralEvents[ind].information = informationEvent
+			self.agentGeneralEvents[ind].polarity = self.lastPolarity
+			#add the updated memory nodes on this event
+			for mc in self.agentShortTermMemory:
+				if self.agentShortTermMemory[mc].informationID in connectNodes and self.agentShortTermMemory[mc] not in self.agentGeneralEvents[ind].nodes:
+					self.agentGeneralEvents[ind].nodes.append(self.agentShortTermMemory[mc])
+
+			return 0
+
+		#create a new general event
+		geId = self.GenerateEpisodeID()
+		ge = GeneralEvent(datetime.now(), typeEvent, informationEvent, geId, self.agentEmotion)
+
+		#set the polarity
+		ge.polarity = self.lastPolarity
+
+		#add the memory nodes on this event
+		for mc in self.agentShortTermMemory:
+			if self.agentShortTermMemory[mc].informationID in connectNodes and self.agentShortTermMemory[mc] not in ge.nodes:
+				ge.nodes.append(self.agentShortTermMemory[mc])
+
+		#add the memory nodes on this event
+		for mc in self.agentLongTermMemory:
+			if self.agentLongTermMemory[mc].informationID in connectNodes and self.agentLongTermMemory[mc] not in ge.nodes:
+				ge.nodes.append(self.agentLongTermMemory[mc])
+
+		#add to list
+		self.agentGeneralEvents[geId] = ge
+
+		return geId
 
 	#deal with the retrieved memory
 	def DealWithIt(self, retrieved, tokens):
@@ -1155,6 +1467,89 @@ class Main(object):
 		#since they know each other, lets start to break the ice!
 		self.isBreakingIce = True
 		self.BreakIce(greetingText)
+
+	#save the new person known
+	def SaveNewPerson(self, tokens):
+		#people can answer with more than just the name (My name is Knob). So, lets treat this
+		namePerson = ""
+
+		for tt in tokens:
+			#find the NNP
+			if tokens[tt] == "NNP":
+				if namePerson == "":
+					namePerson += tt
+				else:
+					namePerson += "_" + tt
+
+		if namePerson != "":
+			self.personName = namePerson.strip()
+			#already know it, do not need to greet
+			self.peopleGreeted.append(self.personName)
+			
+			#copy the camFile to the Data directory, saving with person name
+			#it is going to serve both for face recognition and autobiographical storage for images
+			if exists("AutobiographicalStorage/Images/" + namePerson + ".png"):
+				os.remove("AutobiographicalStorage/Images/" + namePerson + ".png")
+
+			#not needed for now
+			#shutil.copyfile("camImage.png", "AutobiographicalStorage/Images/" + namePerson + ".png")
+			
+			#not needed, i believe
+			#self.SavePersonWebService()
+
+			thisID = self.AddToSTM("Person", namePerson, 0.9)
+			self.personId = thisID
+			connectNodes = []
+			connectNodes.append(1)
+			connectNodes.append(thisID)
+			#not needed for now
+			#thisID = self.AddToSTM("Imagery", "AutobiographicalStorage/Images/" + namePerson + ".png", 0.9)
+			#connectNodes.append(thisID)
+			#connectNodes.append(11)
+
+			#add this date as well
+			thisYear = datetime.now().strftime("%Y-m-d")
+			thisID = self.AddToSTM("Time", thisYear, 0.9)
+			connectNodes.append(thisID)
+			self.AddGeneralEvent("I met " + namePerson + " today", connectNodes, "person")
+
+			self.isKnowingNewPeople = False
+
+			#do not need to greet it right now
+			self.peopleGreeted.append(self.personName)
+
+			self.saveNewMemoryNode = False
+
+			#now that they know each other, lets start to break the ice!
+			self.isUsingMemory = True
+			self.isBreakingIce = True
+			self.BreakIce()
+
+	#Web Service for save a new person
+	def SavePersonWebService(self):
+		# defining the api-endpoint 
+		API_ENDPOINT = self.webServicePath + "savePerson"
+  
+		# your API key here (TODO: WE NEED TO CREATE ONE, USING THIS JUST FOR NOW)
+		API_KEY = self.apiKey
+  
+		#convert image to string
+		b64 = ""
+		with open("camImage.png", "rb") as img_file:
+			b64 = base64.b64encode(img_file.read())
+
+		# data to be sent to api
+		data = {'api_dev_key':API_KEY,
+				'image':[b64],
+				'direc':'Data',
+				'name':self.personName}
+  
+		# sending post request and saving response as response object
+		r = requests.post(url = API_ENDPOINT, json = data)
+  
+		# extracting response text 
+		result = r.text
+		#print("Result: " + result)
 
 	#breaking the ice!
 	def BreakIce(self, beforeText = ""):
