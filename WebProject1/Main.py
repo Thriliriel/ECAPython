@@ -1,4 +1,5 @@
-﻿from PAD import PAD
+﻿from pathlib import Path
+from PAD import PAD
 from Topic import Topic
 from Dialog import Dialog
 import random
@@ -157,7 +158,7 @@ class Main(object):
 
 		#read the next ID from the file
 		#first line: ESK Ids. Second line: Episode Ids
-		fl = open("nextId.txt")
+		fl = open(os.path.abspath("nextId.txt"))
 		idezinhos = fl.read().split('\n')
 		fl.close()
 		self.nextEpisodeId = int(idezinhos[1])
@@ -171,7 +172,7 @@ class Main(object):
 		self.LoadPersonality()
 
 		#reset the result file
-		file_to_delete = open("resultFile.txt",'w')
+		file_to_delete = open(os.path.abspath("resultFile.txt"),'w')
 		file_to_delete.close()
 
 		#reset the result token files
@@ -191,7 +192,7 @@ class Main(object):
 		self.MeetNewPeople()
 
 	def LoadKeywords(self):
-		fl = open("keywords.txt")
+		fl = open(os.path.abspath("keywords.txt"))
 		keyWords = fl.read().split('\n')
 		fl.close()
 		#print(keyWords[0])
@@ -213,7 +214,7 @@ class Main(object):
 
 
 	def LoadSTs(self):
-		fl = open("smallTalk.txt")
+		fl = open(os.path.abspath("smallTalk.txt"))
 		smallT = fl.read().split('\n')
 		fl.close()
 
@@ -273,7 +274,7 @@ class Main(object):
 
 	#load small talks saved in memory
 	def LoadMemoryDialogs(self):
-		fl = open("AutobiographicalStorage/smallTalksUsed.txt")
+		fl = open(os.path.abspath("AutobiographicalStorage/smallTalksUsed.txt"))
 		stu = fl.read().split('\n')
 		fl.close()
 
@@ -413,7 +414,7 @@ class Main(object):
 
 	#Load Episodic memory
 	def LoadEpisodicMemory(self):
-		fl = open("AutobiographicalStorage/episodicMemory.txt")
+		fl = open(os.path.abspath("AutobiographicalStorage/episodicMemory.txt"))
 		em = fl.read().split('\n')
 		fl.close()
 
@@ -451,7 +452,7 @@ class Main(object):
 
 	#Load Personality
 	def LoadPersonality(self):
-		fl = open("personality.txt")
+		fl = open(os.path.abspath("personality.txt"))
 		info = fl.read().split(';')
 		fl.close()
 
@@ -493,7 +494,7 @@ class Main(object):
 
 	#load the icebreakers and respective answers
 	def LoadIceBreakersAndStuff(self):
-		fl = open("icebreakers.txt")
+		fl = open(os.path.abspath("icebreakers.txt"))
 		iceBreak = fl.read().split('\n')
 		fl.close()
 		
@@ -580,9 +581,9 @@ class Main(object):
 
 	#reset token files
 	def ResetTokenFiles(self):
-		file_to_delete = open("resultTokenFile.txt",'w')
+		file_to_delete = open(os.path.abspath("resultTokenFile.txt"),'w')
 		file_to_delete.close()
-		file_to_delete = open("textToTokenFile.txt",'w')
+		file_to_delete = open(os.path.abspath("textToTokenFile.txt"),'w')
 		file_to_delete.close()
 
 	#new version of SendRequestChat
