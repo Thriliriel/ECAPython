@@ -99,6 +99,8 @@ class Main(object):
 	#webServicePath = "http://localhost:5000/"
 
 	def Awake(self):
+		self.chatLog = ""
+
 		self.lastPolarities = []
 
 		#random agent
@@ -401,7 +403,7 @@ class Main(object):
 
 	#Agent says something
 	def SpeakYouFool(self, weirdThingToTalk):
-		newText = "<b>" + self.agentName + "</b>: " + weirdThingToTalk + "\n"
+		newText = self.agentName + ": " + weirdThingToTalk + "\n"
 		#chatText.text += newText;
 
 		#add in chat log
@@ -588,7 +590,7 @@ class Main(object):
 
 	#new version of SendRequestChat
 	def SendRequestChat(self, textSend):
-		newText = "<b>" + self.personName + "</b>: " + textSend + "\n"
+		newText = self.personName + ": " + textSend + "\n"
 
 		#add to chat log
 		self.chatLog += newText
