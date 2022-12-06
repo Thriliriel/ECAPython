@@ -95,8 +95,8 @@ class Main(object):
 	#retrieving memory?
 	isRetrievingMemory = False
 	#webService path
-	#webServicePath = "http://vhlab.lad.pucrs.br:5001/"
-	webServicePath = "http://localhost:5000/"
+	webServicePath = "http://vhlab.lad.pucrs.br:5001/"
+	#webServicePath = "http://localhost:5000/"
 
 	def Awake(self):
 		self.lastPolarities = []
