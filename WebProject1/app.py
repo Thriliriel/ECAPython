@@ -6,11 +6,11 @@ from flask import send_from_directory
 import os
 import cv2
 from Main import Main
-import sys
-import random
+#import sys
+#import random
 from turbo_flask import Turbo
-import threading
-import time
+#import threading
+#import time
 #import numpy as np
 #import asyncio
 
@@ -61,6 +61,11 @@ def awake():
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/finish')
+def finish():
+	mainControl.OnDestroy()
+	return "OK", 200, {'Content-Type': 'text/plain'}
 
 @app.route('/update')
 def update():

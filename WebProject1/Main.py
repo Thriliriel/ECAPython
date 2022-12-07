@@ -11,8 +11,9 @@ from IceBreakTree import IceBreakTree
 import requests
 from os.path import exists
 import os
-import shutil
+#import shutil
 import base64
+import math
 
 class Main(object):
 	#attributes
@@ -94,14 +95,36 @@ class Main(object):
 	isUsingMemory = True
 	#retrieving memory?
 	isRetrievingMemory = False
+	#weight threshold to remove an information from the memory
+	weightThreshold = 0.2
 	#webService path
 	webServicePath = "http://vhlab.lad.pucrs.br:5001/"
 	#webServicePath = "http://localhost:5000/"
+
+	def __del__(self):
+		self.OnDestroy()
+
+	def OnDestroy(self):
+		#save next ID
+		#PlayerPrefs.SetInt("nextIdEvent", nextEpisodeId)
+		#PlayerPrefs.SetInt("nextIdMemory", nextEskId)
+
+		#consolidate memory (which also saves the memory in the end)
+		self.MemoryREM()
+
+		#save used STs
+		#PROBABLY NOT USEFUL IN THIS CONTEXT
+		#SaveUsedST();
+
+		#save chat log
+		#SaveChatLog()
 
 	def Awake(self):
 		self.chatLog = ""
 
 		self.lastPolarities = []
+
+		self.weightThreshold = 0.2
 
 		#random agent
 		rnd = random.randrange(10)
@@ -414,6 +437,66 @@ class Main(object):
 			#also, speak it
 			#sc.GetComponent<SpeakerController>().SpeakSomething(weirdThingToTalk)
 
+	#consolidate memory on REM sleep
+	def MemoryREM(self):
+		#copy from STM to LTM
+		for stm in self.agentShortTermMemory:
+			#check if this memory does not already exists in long term
+			exists = False
+			for lt in self.agentLongTermMemory:
+				if self.agentLongTermMemory[lt].information == self.agentShortTermMemory[stm].information:
+					exists = True
+					break
+
+			#if does not exist, copy
+			if not exists:
+				self.agentLongTermMemory[self.agentShortTermMemory[stm].informationID] = self.agentShortTermMemory[stm]
+
+		#clean STM
+		self.agentShortTermMemory.clear()
+
+		#first: all memory nodes with low activation have their respective weights lowered
+		#update: memory nodes with weight 1 are considered permanent
+		for memC in self.agentLongTermMemory:
+			if self.agentLongTermMemory[memC].activation < 0.2 and self.agentLongTermMemory[memC].weight < 0.9:
+				self.agentLongTermMemory[memC].weight = math.log(self.agentLongTermMemory[memC].weight + 1)
+
+		#all memory nodes with low weight are removed
+		for memC in self.agentLongTermMemory:
+			if self.agentLongTermMemory[memC].weight <= self.weightThreshold:
+				#get its ID, so we can remove from general events also
+				memId = self.agentLongTermMemory[memC].informationID
+
+				#check general events with this ID
+				for ge in self.agentGeneralEvents:
+					if self.agentLongTermMemory[memC] in self.agentGeneralEvents[ge].nodes:
+						i = 0
+						for nodis in self.agentGeneralEvents[ge].nodes:
+							if nodis.informationID == memId:
+								self.agentGeneralEvents[ge].nodes.pop(i)
+								break
+							i += 1
+
+				#remove the memory itself
+				self.agentLongTermMemory.pop(memId)
+				
+		#after removing memories, check the general events which have no more nodes
+		idesKill = []
+		for ge in self.agentGeneralEvents:
+			#if after we remove, there are no more nodes, the event itself is not important
+			if len(self.agentGeneralEvents[ge].nodes) == 0:
+				idesKill.append(ge)
+
+		for kill in idesKill:
+			self.agentGeneralEvents.pop(kill)
+
+		#delete information from LTM.
+		#Basically, we save the new LTM file with just complete information.
+		self.SaveEpisodic()
+
+		#clean LTM
+		self.agentLongTermMemory.clear()
+
 	#Load Episodic memory
 	def LoadEpisodicMemory(self):
 		fl = open(os.path.abspath("AutobiographicalStorage/episodicMemory.txt"))
@@ -451,6 +534,31 @@ class Main(object):
 					
 					#add
 					self.agentGeneralEvents[ide] = newGen
+
+	#save episodic memory file
+	def SaveEpisodic(self):
+		fl = open(os.path.abspath("AutobiographicalStorage/episodicMemory.txt"), "w")
+
+		#first, save the ESK
+		for mem in self.agentLongTermMemory:
+			#ID;Timestamp;Information;Type;Activation;Weight  datetime.strptime(info[1].strip(), "%d/%m/%Y %I:%M:%S %p")
+			fl.write(str(mem) + ";" + self.agentLongTermMemory[mem].memoryTime.strftime("%d/%m/%Y %I:%M:%S %p") + ";" + self.agentLongTermMemory[mem].information.strip() + ";" + str(self.agentLongTermMemory[mem].informationType) + ";" + str(self.agentLongTermMemory[mem].activation) + ";" + str(self.agentLongTermMemory[mem].weight) + "\n")
+		
+		fl.write("%%%\n")
+		#second, we save the episodes
+		for mem in self.agentGeneralEvents:
+			#get the nodes first
+			allNodes = ""
+			for mc in self.agentGeneralEvents[mem].nodes:
+				if allNodes == "": 
+					allNodes = str(mc.informationID)
+				else:
+					allNodes += "_" + str(mc.informationID)
+
+			#ID;Timestamp;Type;Information;Polarity;Nodes
+			fl.write(str(mem) + ";" + self.agentGeneralEvents[mem].eventTime.strftime("%d/%m/%Y %I:%M:%S %p") + ";" + self.agentGeneralEvents[mem].eventType.strip() + ";" + self.agentGeneralEvents[mem].information.strip() + ";" + str(self.agentGeneralEvents[mem].polarity) + ";" + allNodes + "\n")
+
+		fl.close()
 
 	#Load Personality
 	def LoadPersonality(self):
@@ -627,6 +735,8 @@ class Main(object):
 
 	#Web Service for Tokenization
 	def TokenizationWebService(self, sentence):
+		self.saveNewMemoryNode = True
+
 		# defining the api-endpoint 
 		API_ENDPOINT = self.webServicePath + "tokenize"
   
@@ -950,7 +1060,7 @@ class Main(object):
 			#if fiveW is empty, no need to store
 			if fiveW != "":
 				#strip the "'"
-				thisID = self.AddToSTM(fiveW, txt.Key, weight)
+				thisID = self.AddToSTM(fiveW, txt, weight)
 				connectNodes.append(thisID)
 
 				if txt not in infor:
@@ -1511,7 +1621,7 @@ class Main(object):
 			#connectNodes.append(11)
 
 			#add this date as well
-			thisYear = datetime.now().strftime("%Y-m-d")
+			thisYear = datetime.now().strftime("%Y")
 			thisID = self.AddToSTM("Time", thisYear, 0.9)
 			connectNodes.append(thisID)
 			self.AddGeneralEvent("I met " + namePerson + " today", connectNodes, "person")
@@ -1645,6 +1755,9 @@ class Main(object):
 			if beforeText != "":
 				self.SpeakYouFool(beforeText)
 			else:
-				self.SpeakYouFool("Thanks! Anything else you would like to talk about?")
+				#self.SpeakYouFool("Thanks! Anything else you would like to talk about?")
+				#start smalltalks
+				asToki = []
+				self.SmallTalking(asToki)
 
 			self.isBreakingIce = False
