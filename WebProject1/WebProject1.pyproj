@@ -17,6 +17,7 @@
     <Name>WebProject1</Name>
     <RootNamespace>WebProject1</RootNamespace>
     <WebBrowserPort>4449</WebBrowserPort>
+    <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
