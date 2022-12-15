@@ -31,6 +31,13 @@ $ emotions
 # EMOae0503; I can be a little competitive. I will work on that!; EMOae0202;
 ]
 
+$ main
+[ main_dialog
+# MAImd0101; Start of main dialog!; -1;
+# MAImd0202; Start of main dialog!; MAImd0101;
+# MAImd0203; Start of main dialog!; MAImd0101;
+]
+
 $ food
 [ favorite_food
 # FODff0101; Do you like food?; -1;

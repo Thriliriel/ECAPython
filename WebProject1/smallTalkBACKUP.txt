@@ -1,0 +1,141 @@
+$ emotions
+[ happiness_emotion
+# EMOhe0101; Oh, i am feeling good, what about you?; -1;
+# EMOhe0202; I am glad to know! It is always so fun to talk with you!; EMOhe0101;
+# EMOhe0302; I am sorry to hear that. Did something happen?; EMOhe0101;
+# EMOhe0403; Oh no, that is awful...Hope you can recover soon, i am here for you if you need me.; EMOhe0302;
+# EMOhe0503; Anyway, i hope you can recover soon.; EMOhe0302;
+]
+[ sadness_emotion
+# EMOse0101; Me? i am not feeling so good today...; -1;
+# EMOse0202; Oh, nothing special, just not in a good mood today.; EMOse0101;
+# EMOse0302; Thanks. Anyway, how are you doing?; EMOse0101;
+# EMOse0403; Glad to know you are fine; EMOse0302;
+# EMOse0503; Oh, so you are not fine too? But i am sure we will both get better soon enough.; EMOse0302;
+]
+[ fear_emotion
+# EMOfe0101; I am a little scared today. What about you?; -1 
+# EMOfe0202; I watched the horror movie Hereditary, have you ever seen it?; EMOfe0101;
+# EMOfe0302; I am happy to hear that!; EMOfe0101;
+# EMOfe0402; I am sorry to hear that. Do you wanna talk about it?; EMOfe0101;
+# EMOfe0503; Did you like it?; EMOfe0202;
+# EMOfe0603; If you like horror movies, you should propably check Hereditary out, it is a really good movie.; EMOfe0202;
+# EMOfe0704; Me too! We have a similar taste for movies.; EMOfe0503;
+# EMOfe0804; That is too bad.; EMOfe0503;
+]
+[ anger_emotion
+# EMOae0101; I am feeling a bit angry today. How about you?; -1
+# EMOae0202; Because I was playing a game with my friend Bella and I lost.; EMOae0101;
+# EMOae0302; It is good to hear that; EMOae0101;
+# EMOae0402; I am sorry to hear that. Do you wanna talk about it?; EMOae0202;
+# EMOae0503; I can be a little competitive. I will work on that!; EMOae0202;
+]
+
+$ food
+[ favorite_food
+# FODff0101; Do you like food?; -1;
+# FODff0202; I love pizza, do you?; FODff0101;
+# FODff0302; Oh ok, but I assume that you eat every day, right?; FODff0101;
+# FODff0403; My favorite is Calabresa, and yours?; FODff0202;
+# FODff0503; I don´t like Portuguesa, what is your favorite pizza?; FODff0202;
+# FODff0603; That´s ok, wich food did you enjoy most?; FODff0202;
+# FODff0704; So.. what do you eat most?; FODff0302;
+# FODff0804; You are so different than me, nice!; FODff0302;
+# FODff0904; That is awesome, we should eat together someday!; FODff0403;
+# FODff0905; Oh.. thats yummy!; FODff0704;
+]
+[ restaurant
+# FODrt0101; Do you like going on restaurants?; -1;
+# FODrt0202; I love eating outside! Say, do you prefer a pub or a pizzaria?; FODrt0101;
+# FODrt0302; Oh, too bad... So, do you like cooking?; FODrt0101;
+# FODrt0403; I love going on a pizzaria as well!; FODrt0202;
+# FODrt0503; Oh, i would rather prefer a pizzaria, but a pub is also a nice place to enjoy with friends.; FODrt0202;
+# FODrt0603; I see, neither of them so, right?; FODrt0202;
+# FODrt0703; Nice, hope you can cook for me someday!; FODrt0302;
+# FODrt0803; Oh, i see. I like to cook sometimes.; FODrt0302;
+]
+
+$ music
+[ favorite_band
+# MUSfb0101; Hey, do you like music?; -1;
+# MUSfb0202; Nice, what is your favorite band?; MUSfb0101;
+# MUSfb0302; Oh, too bad. Lets talk about something else then.; MUSfb0101;
+# MUSfb0403; Nice one, i love Sonata Arctica, do you know them?; MUSfb0202;
+# MUSfb0503; Oh, i like Sonata Arctica! Say it, did you already listened their song, "white pearl, black oceans"?; MUSfb0202;
+# MUSfb0604; I think they are great!; MUSfb0403;
+# MUSfb0704; I see, i would recommend them; MUSfb0403;
+# MUSfb0804; It is an amazing song! We should listen them together someday.; MUSfb0503;
+# MUSfb0904; Oh, too bad, but if you like Sonata, i think you would love this song.; MUSfb0503;
+]
+
+$ leisure
+[ leisure_activity
+# LEIla0101; Let me ask you, what do you do for fun?; -1;
+# LEIla0202; Oh, that is nice. I like to play videogames, do you like it?; LEIla0101;
+# LEIla0302; Nice, I love playing videogames! What is your favorite game?; LEIla0101;
+# LEIla0403; Oh, too bad. But i think it is fun.; LEIla0202;
+# LEIla0503; Awesome! Have you ever played Metroid?; LEIla0202;
+# LEIla0603; This one is very good, but my favorite is Zelda, have you heard about it?; LEIla0302;
+# LEIla0703; Interesting, mine is Zelda. It seems like we have a similar taste in games!; LEIla0302;
+# LEIla0804; Nice, i love this game!; LEIla0503;
+# LEIla0904; Too bad, but i would recommend it!; LEIla0503;
+# LEIla1004; Yeah, i love this game!; LEIla0603;
+# LEIla1104; Really? It is an awesome game, you should try sometime!; LEIla0603;
+]
+
+$ pets
+[ dog_cat
+# PETdc0101; Tell me something, are you a dog or a cat person?; -1;
+# PETdc0202; Nice, dogs are very loyal companions. Do you have any dog pet?; PETdc0101;
+# PETdc0302; Nice, cats are very independent creatures. Do you have any cat pet?; PETdc0101;
+# PETdc0402; I agree with you, they are both so cute, right?; PETdc0101;
+# PETdc0503; Nice, it must be awesome to have a lovely dog. Did you know that dogs had a major religious role in the Aztec civilization?; PETdc0202;
+# PETdc0603; Oh, i see. Maybe in the future.; PETdc0202;
+# PETdc0703; Nice, it must be awesome to have a kitten. Did you know that cats were represented in social and religious practices of the ancient Egypt?; PETdc0302;
+# PETdc0803; Oh, i see. Maybe in the future.; PETdc0302;
+# PETdc0904; Yeah! Also, they have discovered several ancient burial sites for dogs in Mexico. I read this in Wikipedia, if you want to know more about it.; PETdc0503;
+# PETdc1004; Yeah! Also, several ancient Egyptian deities were depicted and sculptured with cat-like heads, such as Mafdet, Bastet and Sekhmet. I read this in Wikipedia, if you want to know more about it.; PETdc0703;
+]
+
+$ extroversion
+[ introverted
+# EXTin0101; You talk a lot with me! Do you like to talk with other people too?; -1;
+# EXTin0202; Okay, but do you make an effort to try to talk to people?; EXTin0101;
+# EXTin0302; How cool! It's great to exchange experiences with other people. Are you usually the person who starts the conversation?; EXTin0101;
+# EXTin0403; It's okay, everyone has their own time. But it's very important that you talk and make friends with other people, ok?; EXTin0202;
+# EXTin0503; Sometimes people don't talk much either.; EXTin0202;
+# EXTin0603; What a coincidence, I'm like that too.; EXTin0302;
+# EXTin0703; That's cool, I love talking about different subjects.; EXTin0302;
+]
+[ ashamed
+# EXTen0101;Do you like to make presentations on projects you've already done?;-1;
+# EXTen0202;Oh, have you had bad experiences doing this?;EXTen0101;
+# EXTen0302;Wow, that's cool, when they finish my new word recognition algorithm I'll call you to make a presentation for me!;EXTen0101;
+# EXTen0403;Okay, no one is forced to enjoy presenting.;EXTen0202;
+# EXTen0503;I see, and have you tried to train this more?;EXTen0202;
+# EXTen0604;Hmm, try training this a little;EXTen0503;
+# EXTen0704;So sorry, but try to train a little more, it's with practice that we achieve excellence.;EXTen0503;
+]
+[ shy
+# EXTti0101;Today I made a friend named Bella. Do you also usually talk with strangers?;-1;
+# EXTti0202;Oh, so you are more reserved, right?; EXTti0101;
+# EXTti0302;Cool! Someday i will introduce you to her, okay?; EXTti0101;
+# EXTti0403;I see, you are more open to people you already know.; EXTti0202;
+# EXTti0503;Hmmm, right. It’s okay if you are more shy. ; EXTti0202;
+# EXTti0603;Oh, ok. I won’t tell her about this, I promise.; EXTti0302;
+# EXTti0703;Nice! You will like her, she’s very chatty, just like me!; EXTti0302;
+]
+[ inhibited
+# EXTni0101;I’ve been learning about human emotions lately, could you help me with a question? It’s common for you to express emotions to other people?;-1;
+# EXTni0202;I see, it’s not so common for you.; EXTni0101;
+# EXTni0302;I see.. and is it easier for you to share happy thoughts than sad things?; EXTni0101;
+# EXTni0403;Hmm… Interesting,I don't think I've ever met anyone who thinks that. Very cool.; EXTni0302;
+# EXTni0503;Hmmm, right, that makes more sense.; EXTni0302;
+]
+[ extroverted
+# EXTex0101;Do you study right? Are you the person who make questions on the class time or after the class?;-1;
+# EXTex0202;Right, is it because you don't like to talk to a lot of people?;EXTex0101;
+# EXTex0302;Nice, just make sure you don't disturb the teacher.;EXTex0101;
+# EXTex0403;Okay, i understand.;EXTex0202;
+# EXTex0503;I see, sometimes it’s difficult to express your thoughts;EXTex0202;
+]

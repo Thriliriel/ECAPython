@@ -98,8 +98,8 @@ class Main(object):
 	#weight threshold to remove an information from the memory
 	weightThreshold = 0.2
 	#webService path
-	webServicePath = "http://vhlab.lad.pucrs.br:5001/"
-	#webServicePath = "http://localhost:5000/"
+	#webServicePath = "http://vhlab.lad.pucrs.br:5001/"
+	webServicePath = "http://localhost:5000/"
 
 	def __del__(self):
 		self.OnDestroy()
@@ -411,16 +411,23 @@ class Main(object):
 		print(ct)
 
 	#try to find a specific smalltalk
-	def FindSmallTalk(self, cues):
+	def FindSmallTalk(self, cues, name = ""):
 		qntFound = 0
 		dialFound = None
 		for tp in self.topicsFinal:
-			for dl in tp.dialogs:
-				ndFound = dl.CheckCuesNodes(cues)
+			#if there is a name, try to get it
+			if name != "":
+				if tp.GetId() == name:
+					dialFound = tp.dialogs[0]
+					break
+			#otherwise, use the cues
+			else:
+				for dl in tp.dialogs:
+					ndFound = dl.CheckCuesNodes(cues)
 
-				if ndFound > qntFound:
-					qntFound = ndFound
-					dialFound = dl
+					if ndFound > qntFound:
+						qntFound = ndFound
+						dialFound = dl
 
 		return dialFound
 
@@ -778,7 +785,13 @@ class Main(object):
 			pol = pol[0]
 		else:
 			pol = pol[1]
-		self.lastPolarity = float(pol)
+		
+		#sometimes, it comes weird
+		try:
+			self.lastPolarity = float(pol)
+		except:
+			self.lastPolarity = 0
+
 		#add to the list
 		if len(self.lastPolarities) == 5:
 			self.lastPolarities.pop(0)
@@ -1757,7 +1770,15 @@ class Main(object):
 			else:
 				#self.SpeakYouFool("Thanks! Anything else you would like to talk about?")
 				#start smalltalks
-				asToki = []
-				self.SmallTalking(asToki)
+				#get the main smallTalk
+				haa = self.FindSmallTalk([], "main")
+
+				#if not null, use it
+				if haa != None:
+					asToki = []
+					self.SmallTalking(asToki, haa)
+				#else, at least we tried
+				else:
+					self.Dunno()
 
 			self.isBreakingIce = False
